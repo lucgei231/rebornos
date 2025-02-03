@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RebornOS - Windows 11 Web Clone</title>
+    <style>
+        :root {
+            --system-tray-width: 200px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: url('https://source.unsplash.com/1920x1080/?nature,water') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: rgba(30, 30, 30, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .start-button {
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .taskbar .icons {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            gap: 10px;
+        }
+
+        .taskbar .icons div {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .taskbar .icons div:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .system-tray {
+            display: flex;
+            gap: 15px;
+            width: var(--system-tray-width);
+            justify-content: flex-end;
+            resize: horizontal;
+            overflow: hidden;
+            min-width: 100px;
+        }
+
+        .window {
+            position: absolute;
+            width: 800px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: none;
+            overflow: hidden;
+            resize: both;
+            min-width: 300px;
+            min-height: 200px;
+        }
+
+        .window-header {
+            background: #0078d7;
+            color: white;
+            padding: 10px;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .window-header button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #start-menu {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            width: 250px;
+            background: rgba(30, 30, 30, 0.9);
+            color: white;
+            padding: 10px;
+            display: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="taskbar">
+        <div class="start-button" onclick="toggleStartMenu()">O</div>
+        <div class="icons" id="taskbar-icons"></div>
+        <div class="system-tray" contenteditable="true">
+            <div>🔊</div>
+            <div>📶</div>
+            <div>🛠️</div>
+        </div>
+    </div>
+
+    <div id="start-menu">
+        <p>Start Menu</p>
+    </div>
+
+    <div id="windows-container"></div>
+
+    <script>
+        function toggleStartMenu() {
+            let menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function openWindow(url, title) {
+            let windowDiv = document.createElement('div');
+            windowDiv.className = 'window';
+            windowDiv.innerHTML = `<div class='window-header'><span>${title}</span> 
+                                  <button onclick='minimizeWindow(this)'>🗕</button>
+                                  <button onclick='maximizeWindow(this)'>🗖</button>
+                                  <button onclick='closeWindow(this)'>❌</button></div>
+                                  <iframe src='${url}' style='width:100%; height:calc(100% - 40px); border:none;'></iframe>`;
+            document.getElementById('windows-container').appendChild(windowDiv);
+            windowDiv.style.display = 'block';
+        }
+
+        function closeWindow(button) {
+            button.parentElement.parentElement.remove();
+        }
+
+        function minimizeWindow(button) {
+            button.parentElement.parentElement.style.display = 'none';
+        }
+
+        function maximizeWindow(button) {
+            let win = button.parentElement.parentElement;
+            if (win.style.width === '100vw' && win.style.height === '100vh') {
+                win.style.width = '800px';
+                win.style.height = '500px';
+            } else {
+                win.style.width = '100vw';
+                win.style.height = '100vh';
+            }
+        }
+
+        function openFilesApp() {
+            openWindow('file:///', 'File Explorer');
+        }
+
+        function addToTaskbar(name, icon, url) {
+            let iconDiv = document.createElement('div');
+            iconDiv.innerHTML = icon;
+            iconDiv.setAttribute('data-name', name);
+            iconDiv.addEventListener('click', () => openWindow(url, name));
+            document.getElementById('taskbar-icons').appendChild(iconDiv);
+        }
+
+        addToTaskbar('Files', '📁', 'file:///');
+        addToTaskbar('Browser', '🌍', 'https://yandex.com');
+        addToTaskbar('AppOnFly', '🖥️', 'https://app.apponfly.com/trial');
+        addToTaskbar('Minecraft', '🎮', 'https://mcraft.fun');
+    </script>
+</body>
+</html>
